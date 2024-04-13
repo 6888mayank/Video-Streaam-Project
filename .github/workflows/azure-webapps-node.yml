@@ -1,0 +1,289 @@
+# class VideoTile extends StatefulWidget {
+  final MuxLiveData streamData;
+  final String? thumbnailUrl;
+  final String dateTimeString;
+  final bool isReady;
+  final Function(String id) onTap;
+
+  const VideoTile({
+    Key? key,
+    required this.streamData,
+    required this.thumbnailUrl,
+    required this.dateTimeString,
+    required this.isReady,
+    required this.onTap,
+  }) : super(key: key);
+
+  @override
+  State<VideoTile> createState() => _VideoTileState();
+}
+
+class _VideoTileState extends State<VideoTile> {
+  bool _isLongPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(
+            left: 16.0,
+            right: 16.0,
+            top: 8.0,
+          ),
+          child: Container(
+            decoration: _isLongPressed
+                ? BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: Colors.red,
+                      width: 4,
+                    ),
+                  )
+                : null,
+            child: ClipRRect(
+              borderRadius: const BorderRadius.all(
+                Radius.circular(5.0),
+              ),
+              child: InkWell(
+                onTap: () {
+                  widget.isReady
+                      ? Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => PlaybackPage(
+                              streamData: widget.streamData,
+                            ),
+                          ),
+                        )
+                      : ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('The video is not active'),
+                          ),
+                        );
+                },
+                onLongPress: () {
+                  setState(() {
+                    _isLongPressed = true;
+                  });
+                },
+                child: Container(
+                  color: Colors.white,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: double.maxFinite,
+                        color: Colors.pink.shade300,
+                        child: Padding(
+                          padding: const EdgeInsets.only(
+                            left: 8.0,
+                            top: 8.0,
+                            bottom: 8.0,
+                          ),
+                          child: Text(
+                            widget.streamData.id,
+                            style: const TextStyle(
+                              fontSize: 12.0,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          widget.isReady && widget.thumbnailUrl != null
+                              ? SizedBox(
+                                  width: 150,
+                                  height: 100,
+                                  child: Image.network(
+                                    widget.thumbnailUrl!,
+                                    fit: BoxFit.cover,
+                                    alignment: Alignment.bottomCenter,
+                                  ),
+                                )
+                              : Container(
+                                  width: 150,
+                                  height: 100,
+                                  color: Colors.black26,
+                                  child: const Center(
+                                    child: Text(
+                                      'MUX',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 26,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                          Flexible(
+                            child: Padding(
+                              padding: const EdgeInsets.only(
+                                left: 8.0,
+                                top: 8.0,
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  RichText(
+                                    maxLines: 1,
+                                    softWrap: false,
+                                    overflow: TextOverflow.fade,
+                                    text: TextSpan(
+                                      text: 'Status: ',
+                                      style: const TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 14.0,
+                                      ),
+                                      children: [
+                                        TextSpan(
+                                          text: widget.streamData.status,
+                                          style: TextStyle(
+                                            // fontSize: 12.0,
+                                            color:
+                                                Colors.black.withOpacity(0.4),
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4.0),
+                                  RichText(
+                                    maxLines: 2,
+                                    overflow: TextOverflow.clip,
+                                    text: TextSpan(
+                                      text: 'Created on: ',
+                                      style: const TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 14.0,
+                                      ),
+                                      children: [
+                                        TextSpan(
+                                          text: '\n${widget.dateTimeString}',
+                                          style: TextStyle(
+                                            // fontSize: 12.0,
+                                            color:
+                                                Colors.black.withOpacity(0.4),
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        _isLongPressed
+            ? InkWell(
+                onTap: () => widget.onTap(widget.streamData.id),
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Icon(
+                        Icons.close,
+                        color: Colors.white,
+                        size: 26,
+                      ),
+                    ),
+                  ),
+                ),
+              )
+            : const SizedBox(),
+      ],
+    );
+  }
+}This workflow will build and push a node.js application to an Azure Web App when a commit is pushed to your default branch.
+#
+# This workflow assumes you have already created the target Azure App Service web app.
+# For instructions see https://docs.microsoft.com/en-us/azure/app-service/quickstart-nodejs?tabs=linux&pivots=development-environment-cli
+#
+# To configure this workflow:
+#
+# 1. Download the Publish Profile for your Azure Web App. You can download this file from the Overview page of your Web App in the Azure Portal.
+#    For more information: https://docs.microsoft.com/en-us/azure/app-service/deploy-github-actions?tabs=applevel#generate-deployment-credentials
+#
+# 2. Create a secret in your repository named AZURE_WEBAPP_PUBLISH_PROFILE, paste the publish profile contents as the value of the secret.
+#    For instructions on obtaining the publish profile see: https://docs.microsoft.com/azure/app-service/deploy-github-actions#configure-the-github-secret
+#
+# 3. Change the value for the AZURE_WEBAPP_NAME. Optionally, change the AZURE_WEBAPP_PACKAGE_PATH and NODE_VERSION environment variables below.
+#
+# For more information on GitHub Actions for Azure: https://github.com/Azure/Actions
+# For more information on the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# For more samples to get started with GitHub Action workflows to deploy to Azure: https://github.com/Azure/actions-workflow-samples
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+env:
+  AZURE_WEBAPP_NAME: your-app-name    # set this to your application's name
+  AZURE_WEBAPP_PACKAGE_PATH: '.'      # set this to the path to your web app project, defaults to the repository root
+  NODE_VERSION: '14.x'                # set this to the node version to use
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: npm install, build, and test
+      run: |
+        npm install
+        npm run build --if-present
+        npm run test --if-present
+
+    - name: Upload artifact for deployment job
+      uses: actions/upload-artifact@v3
+      with:
+        name: node-app
+        path: .
+
+  deploy:
+    permissions:
+      contents: none
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: 'Development'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+
+    steps:
+    - name: Download artifact from build job
+      uses: actions/download-artifact@v3
+      with:
+        name: node-app
+
+    - name: 'Deploy to Azure WebApp'
+      id: deploy-to-webapp
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ env.AZURE_WEBAPP_NAME }}
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
